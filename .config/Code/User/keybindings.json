@@ -1,0 +1,32 @@
+// Place your key bindings in this file to overwrite the defaults
+[
+    {
+        "key": "alt+d",
+        "command": "workbench.view.explorer"
+    },
+    {
+        "key": "alt+c",
+        "command": "workbench.action.output.toggleOutput"
+    },
+    {
+        "key": "alt+t",
+        "command": "workbench.action.terminal.focus"
+    },
+    {
+        "key": "alt+e",
+        "command": "workbench.action.focusActiveEditorGroup"
+    },
+    {
+        "key": "alt+f",
+        "command": "workbench.view.search",
+        "when": "!searchViewletVisible"
+    },
+    {
+        "key": "ctrl+tab",
+        "command": "workbench.action.nextEditor"
+    },
+    {
+        "key": "ctrl+shift+tab",
+        "command": "workbench.action.previousEditor"
+    },
+]
