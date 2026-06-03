@@ -82,28 +82,49 @@ local function lightroomExportLoop()
   end)
 end
 
--- Ask the user how long to wait between exports, then start the loop.
--- Returns true if export was started, false if the user cancelled or gave bad input.
-local function promptForDelayThenStart()
+-- Show a single numeric dialog and return the validated number, or nil if the
+-- user cancelled / entered something invalid.
+local function promptForSeconds(message, defaultValue, confirmText)
   local buttonText, inputText = hs.dialog.textPrompt(
     "Lightroom Export",
-    "Seconds to wait for each export to finish before advancing to the next image:",
-    tostring(exportProcessDelay),  -- prefill with the current value
-    "Start Export",
+    message,
+    tostring(defaultValue),  -- prefill with the current value
+    confirmText,
     "Cancel"
   )
 
-  if buttonText ~= "Start Export" then
-    return false  -- user cancelled
+  if buttonText ~= confirmText then
+    return nil  -- user cancelled
   end
 
   local seconds = tonumber(inputText)
   if not seconds or seconds <= 0 then
     hs.alert.show("Please enter a positive number of seconds")
-    return false
+    return nil
   end
 
-  exportProcessDelay = seconds
+  return seconds
+end
+
+-- Ask the user for both delays, then start the loop.
+-- Returns true if export was started, false if the user cancelled or gave bad input.
+local function promptForDelayThenStart()
+  local processDelay = promptForSeconds(
+    "Seconds to wait for each export to finish before advancing to the next image:",
+    exportProcessDelay,
+    "Next"
+  )
+  if not processDelay then return false end
+
+  local advanceDelay = promptForSeconds(
+    "Seconds to wait after advancing to the next image before exporting again:",
+    imageAdvanceDelay,
+    "Start Export"
+  )
+  if not advanceDelay then return false end
+
+  exportProcessDelay = processDelay
+  imageAdvanceDelay  = advanceDelay
   return true
 end
 
@@ -124,7 +145,7 @@ hs.hotkey.bind({"cmd", "shift"}, "E", function()
   -- Not running → ask for the delay, then start.
   if promptForDelayThenStart() then
     lightroomExportRunning = true
-    hs.alert.show(string.format("Lightroom export started (%gs per export)", exportProcessDelay))
+    hs.alert.show(string.format("Lightroom export started (%gs export, %gs advance)", exportProcessDelay, imageAdvanceDelay))
     lightroomExportLoop()
   end
 end)
